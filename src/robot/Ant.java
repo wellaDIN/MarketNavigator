@@ -28,12 +28,10 @@ public class Ant {
 			}
 			double[] probabilities = getProbabilities(possiblePaths);
 			Path decision = possiblePaths.get(choose_path(probabilities));
-			System.out.print(decision.getAction(currentPosition) + " -> ");
 			route.addAction(decision.getAction(currentPosition));
 			currentPosition = decision.otherPoint(currentPosition);
 		}
 		route.print();
-		System.out.println("Now pheromones must be updated..");
 	}
 
 	private List<Path> avoid_last_step_repetition(List<Path> possiblePaths) {

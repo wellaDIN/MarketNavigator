@@ -8,8 +8,8 @@ import utility.Utility;
 
 public class Maze {
 
-	private int width;
-	private int height;
+	private int width; //Number of columns
+	private int height; //Number of Rows
 	private int[][] maze;
 	private Coordinate startingPoint;
 	private Coordinate endingPoint;
@@ -60,7 +60,6 @@ public class Maze {
 			}
 		}
 	}
-
 
 	private boolean alreadyContained(List<Path> paths, Path newPath) {
 		for(int i=0;i<paths.size();i++){

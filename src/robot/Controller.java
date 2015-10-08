@@ -9,13 +9,13 @@ import maze.Path;
 public class Controller {
 
 	//Definition of the constant for the algorithm and the problem
-	private static final int MAX_ITERATIONS = 100;
-	private static final int ANTS_PER_ITERATION = 2;
-	private static final int PHEROMONE = 100;
-	private static final double EVAPORATION_CONSTANT = 0.1;
+	private static final int MAX_ITERATIONS = 10000;
+	private static final int ANTS_PER_ITERATION = 7;
+	private static final int PHEROMONE = 1000;
+	private static final double EVAPORATION_CONSTANT = 0.3;
 	private static final int CONVERGENCE = 3;
-	private static final String MAZE_FILE = "file/stupid_maze.txt";
-	private static final String MAZE_COORDINATES = "file/stupid_coordinates.txt";
+	private static final String MAZE_FILE = "file/easy_maze.txt";
+	private static final String MAZE_COORDINATES = "file/easy_coordinates.txt";
 	
 	/*
 	 * Importing the maze files and managing the main loop, considering the
@@ -51,7 +51,6 @@ public class Controller {
 			ants[i].colonize();
 			//TODO Round in the proper way
 			D_pheromone[i] = PHEROMONE / ants[i].getRouteLength();
-			System.out.println(D_pheromone[i]);
 		}
 		//Updating pheromones
 		apply_evaporation(paths);

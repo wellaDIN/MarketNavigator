@@ -60,8 +60,8 @@ public class Utility {
 			dis = new DataInputStream(bis);
 			@SuppressWarnings("deprecation")
 			String[] coordinates = dis.readLine().split(", |;");
-			x = Integer.parseInt(coordinates[0]);
-			y = Integer.parseInt(coordinates[1]);
+			x = Integer.parseInt(coordinates[1]);
+			y = Integer.parseInt(coordinates[0]);
 			startingPoint = new Coordinate(x,y);
 		} catch (FileNotFoundException e){
 			e.printStackTrace();
@@ -86,8 +86,8 @@ public class Utility {
 			dis = new DataInputStream(bis);
 			dis.readLine();
 			String[] coordinates = dis.readLine().split(", |;");
-			x = Integer.parseInt(coordinates[0]);
-			y = Integer.parseInt(coordinates[1]);
+			x = Integer.parseInt(coordinates[1]);
+			y = Integer.parseInt(coordinates[0]);
 			endingPoint = new Coordinate(x,y);
 		} catch (FileNotFoundException e){
 			e.printStackTrace();
