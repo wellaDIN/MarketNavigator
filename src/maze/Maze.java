@@ -25,6 +25,26 @@ public class Maze {
 	}
 	
 	
+	public Coordinate getStartingPoint() {
+		return startingPoint;
+	}
+
+
+	public void setStartingPoint(Coordinate startingPoint) {
+		this.startingPoint = startingPoint;
+	}
+
+
+	public Coordinate getEndingPoint() {
+		return endingPoint;
+	}
+
+
+	public void setEndingPoint(Coordinate endingPoint) {
+		this.endingPoint = endingPoint;
+	}
+
+
 	private void initialize_paths() {
 		for(int i=0;i<height;i++){
 			for(int j=0;j<width;j++){
@@ -88,6 +108,10 @@ public class Maze {
 		}
 		System.out.println("\nStarting Point : " + startingPoint.print());
 		System.out.println("Ending Point : " + endingPoint.print());
+	}
+	
+	public List<Path> getPaths() {
+		return paths;
 	}
 	
 }
