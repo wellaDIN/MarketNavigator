@@ -1,5 +1,8 @@
 package robot;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 import maze.Coordinate;
@@ -9,13 +12,16 @@ import maze.Path;
 public class Controller {
 
 	//Definition of the constant for the algorithm and the problem
-	private static final int MAX_ITERATIONS = 10000;
-	private static final int ANTS_PER_ITERATION = 7;
+	private static final int MAX_ITERATIONS = 1000;
+	private static final int ANTS_PER_ITERATION = 5;
 	private static final int PHEROMONE = 1000;
-	private static final double EVAPORATION_CONSTANT = 0.3;
-	private static final int CONVERGENCE = 3;
-	private static final String MAZE_FILE = "file/easy_maze.txt";
-	private static final String MAZE_COORDINATES = "file/easy_coordinates.txt";
+	private static final double EVAPORATION_CONSTANT = 0.5;
+	private static final int CONVERGENCE = 50;
+	private static final String MAZE_FILE = "file/stupid_maze.txt";
+	private static final String MAZE_COORDINATES = "file/stupid_coordinates.txt";
+	private static Route bestRoute = null;
+	private static int counter = 0;
+	private static int bestLength = 0;
 	
 	/*
 	 * Importing the maze files and managing the main loop, considering the
@@ -26,8 +32,38 @@ public class Controller {
 		maze.print();
 		int iteration=1;
 		while(!convergence_criterion() && iteration<=MAX_ITERATIONS){
+			System.out.println("The best lenght is" + bestLength);
+			System.out.println("Counter = " + counter);
 			ants_colonization(maze);
 			iteration++;
+		}
+		createFileWithFinalRoute();
+	}
+
+	private static void createFileWithFinalRoute() {
+		File finalRouteFile = new File("file/output/finalRoute.txt");
+		try {
+			if(finalRouteFile.createNewFile()){
+				System.out.println("OK");
+			} else{
+				PrintWriter writer = new PrintWriter("file/output/finalRoute.txt");
+				writer.print("");
+				writer.close();
+			}
+			PrintWriter writer = new PrintWriter("file/output/finalRoute.txt");
+			String toBeWritten1 = bestRoute.getLength() + ";";
+			String toBeWritten2 = bestRoute.getStartingPoint().getX() + ", " + bestRoute.getStartingPoint().getX() + ";";
+			String toBeWritten3 = "";
+			for(int i=0; i<bestRoute.getActionList().size();i++){
+				toBeWritten3 = toBeWritten3 + bestRoute.getActionList().get(i).getNumber() + ";";
+			}
+			writer.println(toBeWritten1);
+			writer.println(toBeWritten2);
+			writer.println(toBeWritten3);
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -52,10 +88,42 @@ public class Controller {
 			//TODO Round in the proper way
 			D_pheromone[i] = PHEROMONE / ants[i].getRouteLength();
 		}
+		Route bestRoutePerIteration = findBestRoute(ants);
+		if(bestRoute==null){
+			bestRoute = bestRoutePerIteration;
+		}
+		if(bestRoutePerIteration.getLength()<bestRoute.getLength()){
+			bestRoute = bestRoutePerIteration;
+		}
+		increase_counter(bestRoutePerIteration.getLength());
+		System.out.println("BEST LENGHT OF THIS ITERATION = " + bestRoutePerIteration.getLength());
 		//Updating pheromones
 		apply_evaporation(paths);
 		release_pheromone(paths,ants,D_pheromone);
-		print(paths);
+	}
+
+	private static void increase_counter(int length) {
+		if(length==bestLength){
+			counter++;
+			return;
+		}
+		else {
+			counter=0;
+			if(bestLength==0 || length<bestLength){
+				bestLength = length;
+				return;
+			}
+		}
+	}
+
+	private static Route findBestRoute(Ant[] ants) {
+		int i = 0;
+		for(int j=1; j<ants.length;j++){
+			if(ants[j].getRouteLength()<ants[i].getRouteLength()){
+				i=j;
+			}
+		}
+		return ants[i].getRoute();
 	}
 
 	/**
@@ -105,7 +173,11 @@ public class Controller {
 	}
 
 	private static boolean convergence_criterion() {
-		return false;
+		if(counter>=CONVERGENCE){
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	
