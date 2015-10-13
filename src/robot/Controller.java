@@ -11,14 +11,14 @@ import maze.Path;
 
 public class Controller {
 
-	//Definition of the constant for the algorithm and the problem
-	private static final int MAX_ITERATIONS = 1000;
-	private static final int ANTS_PER_ITERATION = 5;
-	private static final int PHEROMONE = 1000;
-	private static final double EVAPORATION_CONSTANT = 0.5;
+	//Definition of the constant for the algorithm,and the problem
+	private static final int MAX_ITERATIONS = 250;
+	private static final int ANTS_PER_ITERATION = 4;
+	private static final int PHEROMONE = 50000;
+	private static final double EVAPORATION_CONSTANT = 0.8;
 	private static final int CONVERGENCE = 50;
-	private static final String MAZE_FILE = "file/stupid_maze.txt";
-	private static final String MAZE_COORDINATES = "file/stupid_coordinates.txt";
+	private static final String MAZE_FILE = "file/hard_maze.txt";
+	private static final String MAZE_COORDINATES = "file/hard_coordinates.txt";
 	private static Route bestRoute = null;
 	private static int counter = 0;
 	private static int bestLength = 0;
@@ -32,10 +32,10 @@ public class Controller {
 		maze.print();
 		int iteration=1;
 		while(!convergence_criterion() && iteration<=MAX_ITERATIONS){
-			System.out.println("The best lenght is" + bestLength);
-			System.out.println("Counter = " + counter);
+			System.out.print(iteration + "-th iteration best length: ");
 			ants_colonization(maze);
 			iteration++;
+			//print(maze.getPaths());
 		}
 		createFileWithFinalRoute();
 	}
@@ -89,6 +89,7 @@ public class Controller {
 			D_pheromone[i] = PHEROMONE / ants[i].getRouteLength();
 		}
 		Route bestRoutePerIteration = findBestRoute(ants);
+		System.out.println(bestRoutePerIteration.getLength());
 		if(bestRoute==null){
 			bestRoute = bestRoutePerIteration;
 		}
@@ -96,7 +97,6 @@ public class Controller {
 			bestRoute = bestRoutePerIteration;
 		}
 		increase_counter(bestRoutePerIteration.getLength());
-		System.out.println("BEST LENGHT OF THIS ITERATION = " + bestRoutePerIteration.getLength());
 		//Updating pheromones
 		apply_evaporation(paths);
 		release_pheromone(paths,ants,D_pheromone);

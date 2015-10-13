@@ -9,6 +9,8 @@ public class Path {
 	private Coordinate lastPoint;
 	private Action firstToLastAction;
 	private double pheromone;
+	private boolean toAvoid;
+	private boolean isPartOfALoop;
 	
 	public void pheromoneEvaporation(double constant){
 		this.pheromone*=(1-constant);
@@ -24,6 +26,8 @@ public class Path {
 		firstToLastAction = action;
 		lastPoint = firstPoint.getNeighbor(action);
 		this.pheromone = 1;
+		this.toAvoid=false;
+		this.setPartOfALoop(false);
 	}
 
 	public Action getAction (Coordinate point){
@@ -37,7 +41,7 @@ public class Path {
 	}
 	
 	public void print() {
-		System.out.println("Path from " + firstPoint.print() + " to " + lastPoint.print() + " contains " + this.pheromone + " pheronome.");
+		System.out.println("Path from " + firstPoint.print() + " to " + lastPoint.print() + " contains " + this.pheromone + " pheronome. To Avoid? " + this.toAvoid + ". Part of a loop? " + this.isPartOfALoop);
 	}
 
 	public boolean equalsTo(Path newPath) {
@@ -68,6 +72,7 @@ public class Path {
 		return null;
 	}
 
+	//TODO Be sure about this working
 	public boolean matchesWith(Coordinate point, Action action) {
 		if(point.equalsTo(firstPoint) && action.equals(firstToLastAction)){
 			return true;
@@ -80,5 +85,25 @@ public class Path {
 
 	public void increasePheromone(int i) {
 		this.pheromone+=i;
+	}
+
+	public void setAsToBeAvoided() {
+		this.toAvoid=true;
+	}
+
+	public boolean isToAvoid() {
+		return toAvoid;
+	}
+
+	public void markAsInALoop() {
+		this.setPartOfALoop(true);
+	}
+
+	public boolean isPartOfALoop() {
+		return isPartOfALoop;
+	}
+
+	private void setPartOfALoop(boolean isPartOfALoop) {
+		this.isPartOfALoop = isPartOfALoop;
 	}
 }
