@@ -5,8 +5,8 @@ import robot.Action;
 public class Path {
 
 	
-	private Coordinate firstPoint;
-	private Coordinate lastPoint;
+	public Coordinate firstPoint;
+	public Coordinate lastPoint;
 	private Action firstToLastAction;
 	private double pheromone;
 	private boolean toAvoid;

@@ -7,10 +7,14 @@ public class Coordinate {
 
 	private int x;
 	private int y;
+	private boolean isAnExit;
+	private boolean hasBeenMarked;
 
 	public Coordinate(int x, int y) {
 		this.x=x;
 		this.y=y;
+		this.setAnExit(false);
+		this.setAsMarked(false);
 	}
 	
 	public int getX() {
@@ -62,6 +66,22 @@ public class Coordinate {
 		} else {
 			return false;
 		}
+	}
+
+	public boolean hasBeenMarked() {
+		return hasBeenMarked;
+	}
+
+	public void setAsMarked(boolean hasBeenMarked) {
+		this.hasBeenMarked = hasBeenMarked;
+	}
+
+	public boolean isAnExit() {
+		return isAnExit;
+	}
+
+	public void setAnExit(boolean isAnExit) {
+		this.isAnExit = isAnExit;
 	}
 	
 	

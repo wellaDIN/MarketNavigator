@@ -12,13 +12,13 @@ import maze.Path;
 public class Controller {
 
 	//Definition of the constant for the algorithm,and the problem
-	private static final int MAX_ITERATIONS = 250;
-	private static final int ANTS_PER_ITERATION = 4;
-	private static final int PHEROMONE = 50000;
-	private static final double EVAPORATION_CONSTANT = 0.8;
-	private static final int CONVERGENCE = 50;
-	private static final String MAZE_FILE = "file/hard_maze.txt";
-	private static final String MAZE_COORDINATES = "file/hard_coordinates.txt";
+	private static final int MAX_ITERATIONS = 1000;
+	private static final int ANTS_PER_ITERATION = 1;
+	private static final int PHEROMONE = 1000;
+	private static final double EVAPORATION_CONSTANT = 0.9;
+	private static final int CONVERGENCE = 20;
+	private static final String MAZE_FILE = "file/open_maze.txt";
+	private static final String MAZE_COORDINATES = "file/open_coordinates.txt";
 	private static Route bestRoute = null;
 	private static int counter = 0;
 	private static int bestLength = 0;
@@ -35,9 +35,21 @@ public class Controller {
 			System.out.print(iteration + "-th iteration best length: ");
 			ants_colonization(maze);
 			iteration++;
+			printExites(maze.getPaths());
 			//print(maze.getPaths());
 		}
 		createFileWithFinalRoute();
+	}
+
+	private static void printExites(List<Path> paths) {
+		for(int i=0;i<paths.size();i++){
+			if(paths.get(i).firstPoint.isAnExit()){
+				System.out.println(paths.get(i).firstPoint.print() + " is an exit.");
+			} 
+			if(paths.get(i).lastPoint.isAnExit()){
+				System.out.println(paths.get(i).lastPoint.print() + " is an exit.");
+			}
+		}
 	}
 
 	private static void createFileWithFinalRoute() {
@@ -52,7 +64,7 @@ public class Controller {
 			}
 			PrintWriter writer = new PrintWriter("file/output/finalRoute.txt");
 			String toBeWritten1 = bestRoute.getLength() + ";";
-			String toBeWritten2 = bestRoute.getStartingPoint().getX() + ", " + bestRoute.getStartingPoint().getX() + ";";
+			String toBeWritten2 = bestRoute.getStartingPoint().getY() + ", " + bestRoute.getStartingPoint().getX() + ";";
 			String toBeWritten3 = "";
 			for(int i=0; i<bestRoute.getActionList().size();i++){
 				toBeWritten3 = toBeWritten3 + bestRoute.getActionList().get(i).getNumber() + ";";
@@ -83,11 +95,13 @@ public class Controller {
 		for(int i=0; i<ANTS_PER_ITERATION;i++){
 			ants[i] = new Ant(startingPoint, endingPoint, paths);
 		}
+
 		for(int i=0; i<ANTS_PER_ITERATION;i++){
 			ants[i].colonize();
 			//TODO Round in the proper way
 			D_pheromone[i] = PHEROMONE / ants[i].getRouteLength();
 		}
+
 		Route bestRoutePerIteration = findBestRoute(ants);
 		System.out.println(bestRoutePerIteration.getLength());
 		if(bestRoute==null){
