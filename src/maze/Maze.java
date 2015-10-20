@@ -14,6 +14,7 @@ public class Maze {
 	private Coordinate startingPoint;
 	private Coordinate endingPoint;
 	private List<Path> paths = new ArrayList<Path>();
+	private List<OpenSpace> openSpaces = new ArrayList<OpenSpace>();
 	
 	public Maze(String mazeFile, String mazeCoordinates) {
 		this.maze = Utility.mazeFileToMatrix(mazeFile);
@@ -111,6 +112,16 @@ public class Maze {
 	
 	public List<Path> getPaths() {
 		return paths;
+	}
+
+
+	public List<OpenSpace> getOpenSpaces() {
+		return openSpaces;
+	}
+
+
+	public void setOpenSpaces(List<OpenSpace> openSpaces) {
+		this.openSpaces = openSpaces;
 	}
 	
 }

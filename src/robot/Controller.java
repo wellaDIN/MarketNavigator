@@ -12,13 +12,13 @@ import maze.Path;
 public class Controller {
 
 	//Definition of the constant for the algorithm,and the problem
-	private static final int MAX_ITERATIONS = 1000;
-	private static final int ANTS_PER_ITERATION = 1;
+	private static final int MAX_ITERATIONS = 5000;
+	private static final int ANTS_PER_ITERATION = 15;
 	private static final int PHEROMONE = 1000;
-	private static final double EVAPORATION_CONSTANT = 0.9;
-	private static final int CONVERGENCE = 20;
-	private static final String MAZE_FILE = "file/open_maze.txt";
-	private static final String MAZE_COORDINATES = "file/open_coordinates.txt";
+	private static final double EVAPORATION_CONSTANT = 0.1;
+	private static final int CONVERGENCE = MAX_ITERATIONS/3+1;
+	private static final String MAZE_FILE = "file/medium_maze.txt";
+	private static final String MAZE_COORDINATES = "file/medium_coordinates.txt";
 	private static Route bestRoute = null;
 	private static int counter = 0;
 	private static int bestLength = 0;
@@ -32,12 +32,16 @@ public class Controller {
 		maze.print();
 		int iteration=1;
 		while(!convergence_criterion() && iteration<=MAX_ITERATIONS){
-			System.out.print(iteration + "-th iteration best length: ");
+			System.out.println("ITERAZIONE NUMERO " + iteration);
 			ants_colonization(maze);
 			iteration++;
-			printExites(maze.getPaths());
+		/*	printExites(maze.getPaths());
+			for(int i=0;i<maze.getOpenSpaces().size();i++){
+				maze.getOpenSpaces().get(i).print();
+			}*/
 			//print(maze.getPaths());
 		}
+		System.out.println("BEST = " + bestRoute.getLength());
 		createFileWithFinalRoute();
 	}
 
@@ -93,7 +97,7 @@ public class Controller {
 		Coordinate endingPoint = maze.getEndingPoint();
 		List<Path> paths = maze.getPaths();
 		for(int i=0; i<ANTS_PER_ITERATION;i++){
-			ants[i] = new Ant(startingPoint, endingPoint, paths);
+			ants[i] = new Ant(startingPoint, endingPoint, paths, maze.getOpenSpaces());
 		}
 
 		for(int i=0; i<ANTS_PER_ITERATION;i++){
@@ -103,7 +107,7 @@ public class Controller {
 		}
 
 		Route bestRoutePerIteration = findBestRoute(ants);
-		System.out.println(bestRoutePerIteration.getLength());
+		System.out.println("RISULTATO MIGLIORE PER QUESTA ITERAZIONE: " + bestRoutePerIteration.getLength());
 		if(bestRoute==null){
 			bestRoute = bestRoutePerIteration;
 		}
