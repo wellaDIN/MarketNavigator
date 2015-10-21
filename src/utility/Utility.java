@@ -1,11 +1,15 @@
 package utility;
 
+import genetic.Product;
+
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import maze.Coordinate;
@@ -95,5 +99,32 @@ public class Utility {
 			e.printStackTrace();
 		}
 		return endingPoint;
+	}
+
+	@SuppressWarnings({ "deprecation", "resource" })
+	public static List<Product> productsFileToProductsList(String s) {
+		List<Product> products = new ArrayList<Product>();
+		File file = new File(s);
+		FileInputStream fis = null;
+		BufferedInputStream bis = null;
+		DataInputStream dis = null;
+		try {
+			fis = new FileInputStream(file);
+			bis = new BufferedInputStream(fis);
+			dis = new DataInputStream(bis);
+			int number = Integer.parseInt(dis.readLine().split(";")[0]);
+			for(int i=0;i<number;i++){
+				String[] coordinates = dis.readLine().split(": |, |;");
+				int id = Integer.parseInt(coordinates[0]);
+				int x = Integer.parseInt(coordinates[2]);
+				int y = Integer.parseInt(coordinates[1]);
+				products.add(new Product(id,new Coordinate(x,y)));
+			}
+		} catch (FileNotFoundException e){
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return products;
 	}
 }

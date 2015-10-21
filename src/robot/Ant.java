@@ -208,6 +208,19 @@ public class Ant {
 			visitedPositions.add(currentPosition);
 			}
 		}
+		analyze(currentPosition);
+		if(currentPosition.isAnExit()){
+			if(this.lastExit==null){
+				lastExit = currentPosition;
+			} else {
+				if(!lastExit.equalsTo(currentPosition)){
+					if(!alreadyAnOpenSpace(lastExit, currentPosition)){
+						this.openSpaces.add(new OpenSpace(lastExit, currentPosition));
+					}
+					lastExit=currentPosition;
+				}
+			}
+		}
 		//System.out.println("Una formica ha raggiunto la fine del labirinto!");
 		/*
 		if(currentPosition.isAnExit()){

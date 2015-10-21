@@ -53,4 +53,9 @@ public class Route {
 	public Coordinate getStartingPoint() {
 		return this.startingPoint;
 	}
+
+
+	public void abort() {
+		this.actions.clear();
+	}
 }

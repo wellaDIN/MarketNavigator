@@ -12,16 +12,16 @@ import maze.Path;
 public class Controller {
 
 	//Definition of the constant for the algorithm,and the problem
-	private static final int MAX_ITERATIONS = 5000;
-	private static final int ANTS_PER_ITERATION = 15;
-	private static final int PHEROMONE = 1000;
-	private static final double EVAPORATION_CONSTANT = 0.1;
+	private static final int MAX_ITERATIONS = 10;
+	private static final int ANTS_PER_ITERATION = 1;
+	private static final int PHEROMONE = 500;
+	private static final double EVAPORATION_CONSTANT = 0.8;
 	private static final int CONVERGENCE = MAX_ITERATIONS/3+1;
-	private static final String MAZE_FILE = "file/medium_maze.txt";
-	private static final String MAZE_COORDINATES = "file/medium_coordinates.txt";
-	private static Route bestRoute = null;
-	private static int counter = 0;
-	private static int bestLength = 0;
+	private static final String MAZE_FILE = "file/easy_maze.txt";
+	private static final String MAZE_COORDINATES = "file/easy_coordinates.txt";
+	private static Route bestRoute;
+	private static int counter;
+	private static int bestLength;
 	
 	/*
 	 * Importing the maze files and managing the main loop, considering the
@@ -29,7 +29,18 @@ public class Controller {
 	 */
 	public static void main(String[] args) {
 		Maze maze = new Maze(MAZE_FILE,MAZE_COORDINATES);
-		maze.print();
+		ACO(maze, maze.getStartingPoint(), maze.getEndingPoint());
+	}
+
+	public static Route ACO(Maze maze, Coordinate startingPoint, Coordinate endingPoint) {
+		bestRoute = null;
+		counter = 0;
+		bestLength = 0;
+		maze.setStartingPoint(startingPoint);
+		maze.setEndingPoint(endingPoint);
+		System.out.println("Starting point: " + startingPoint.print());
+		System.out.println("Ending point: " + endingPoint.print());
+		//maze.print();
 		int iteration=1;
 		while(!convergence_criterion() && iteration<=MAX_ITERATIONS){
 			System.out.println("ITERAZIONE NUMERO " + iteration);
@@ -42,7 +53,8 @@ public class Controller {
 			//print(maze.getPaths());
 		}
 		System.out.println("BEST = " + bestRoute.getLength());
-		createFileWithFinalRoute();
+		createFileWithFinalRoute();		
+		return bestRoute;
 	}
 
 	private static void printExites(List<Path> paths) {
@@ -103,7 +115,11 @@ public class Controller {
 		for(int i=0; i<ANTS_PER_ITERATION;i++){
 			ants[i].colonize();
 			//TODO Round in the proper way
-			D_pheromone[i] = PHEROMONE / ants[i].getRouteLength();
+			if(ants[i].getRouteLength()!=0){
+				D_pheromone[i] = PHEROMONE / ants[i].getRouteLength();
+			} else {
+				D_pheromone[i]=0;
+			}
 		}
 
 		Route bestRoutePerIteration = findBestRoute(ants);
