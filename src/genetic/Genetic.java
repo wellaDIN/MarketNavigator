@@ -19,13 +19,16 @@ public class Genetic {
 	private static final String MAZE_FILE = "file/easy_maze.txt";
 	private static final String MAZE_COORDINATES = "file/easy_coordinates.txt";
 	private static final int POPULATION_SIZE = 3;
+	private static final int ELITISTS_NUMBER = 1;
 	private static final int MAX_ITERATIONS = 10;
+	private static final double MUTATION_THRESHOLD = 0.1;
 	private static List<Product> products;
 	private static Coordinate startingPoint;
 	private static Coordinate endingPoint;
 	private static int[][] distances;
 	private static Route[][] routes;
 	private static List<Chromosome> chromosomes = new ArrayList<Chromosome>();
+	private static List<Chromosome> elitists = new ArrayList<Chromosome>();
 	
 	public static void main(String[] args) {
 		products = Utility.productsFileToProductsList(PRODUCTS_FILE);
@@ -79,58 +82,145 @@ public class Genetic {
 		}
 		int counter=0;
 		print(chromosomes);
+		findElitists(chromosomes);
 		while(counter<MAX_ITERATIONS){
-			Chromosome father = selectBestChromosome(chromosomes);
-			List<Chromosome> temp = new ArrayList<Chromosome>();
-			for(int i=0;i<chromosomes.size();i++){
-				if(!chromosomes.get(i).equals(father)){
-					temp.add(chromosomes.get(i));
+			List<Chromosome> newPopulation = new ArrayList<Chromosome>();
+			newPopulation.addAll(elitists);
+			while(newPopulation.size()!=chromosomes.size()){
+				Chromosome[] parents = selectParents(chromosomes);
+				Chromosome[] children = crossOver(parents[0],parents[1]);
+				Random generator = new Random();
+				Double p1 = generator.nextDouble();
+				Double p2 = generator.nextDouble();
+				if(p1<MUTATION_THRESHOLD){
+					mutate(children[0]);
 				}
-			}
-			Chromosome mother = selectBestChromosome(temp);
-			for(int i=0;i<chromosomes.size();i++){
-				if(chromosomes.get(i).equals(mother)){
-					mother = chromosomes.get(i);
+				if(p2<MUTATION_THRESHOLD){
+					mutate(children[1]);
 				}
+				newPopulation.add(children[0]);
+				newPopulation.add(children[1]);
 			}
-			Chromosome[] children = crossOver(father,mother);
-			//MUTATION
-			Boolean c1 = true;
-			Boolean c2 = true;
-			for(int i=0;i<chromosomes.size();i++){
-				if(chromosomes.get(i).equals(children[0])){
-					c1=false;
-				}
-				if(chromosomes.get(i).equals(children[1])){
-					c2=false;
-				}
-			}
-			if(c1){
-				chromosomes.add(children[0]);
-			}
-			if(c2){
-				chromosomes.add(children[1]);
-			}
-			while(chromosomes.size()>POPULATION_SIZE){
-				removeWorstChromosome(chromosomes);
-			}
+			elitists.clear();
+			chromosomes.clear();
+			chromosomes = newPopulation;
+			findElitists(chromosomes);
 			counter++;
 		}
 		print(chromosomes);
+		createFileWithFinalRoute();
 	}
 
-	private static void removeWorstChromosome(List<Chromosome> chromosomes) {
-		double[] fitness = new double[chromosomes.size()];
-		for(int i=0;i<fitness.length;i++){
-			fitness[i] = evaluateFitness(chromosomes.get(i));
+	
+	private static void createFileWithFinalRoute() {
+		File finalRouteFile = new File("file/output/TSPFinalRoute.txt");
+		try {
+			if(finalRouteFile.createNewFile()){
+				System.out.println("OK");
+			} else{
+				PrintWriter writer = new PrintWriter("file/output/TSPFinalRoute.txt");
+				writer.print("");
+				writer.close();
+			}
+			PrintWriter writer = new PrintWriter("file/output/TSPFinalRoute.txt");
+			Chromosome bestChromosome = selectBestChromosome(chromosomes);
+			int[] genes = bestChromosome.getGenes();
+			Route start = routes[0][genes[0]];
+			Route end = routes[genes[genes.length-1]][products.size()+1];
+			int length = start.getLength() + end.getLength();
+			Route[] paths = new Route[genes.length-1];
+			for(int i=0;i<paths.length;i++){
+				paths[i] = routes[genes[i]][genes[i+1]];
+				length += paths[i].getLength();
+			}
+			writer.println(length);
+			writer.println(startingPoint.getY() + ", " + startingPoint.getX() + ";");
+			for(int i=0;i<start.getActionList().size();i++){
+				writer.println(start.getActionList().get(i).getNumber() + ";");
+			}
+			writer.println("take product #" + genes[0] + ";");
+			for(int i=0;i<paths.length;i++){
+				for(int j=0;j<paths[i].getActionList().size();j++){
+					writer.println(paths[i].getActionList().get(j).getNumber() + ";");
+				}
+				writer.println("take product #" + genes[i+1] + ";");
+			}
+			for(int i=0;i<end.getActionList().size();i++){
+				writer.println(end.getActionList().get(i).getNumber() + ";");
+			}
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		int min = 0;
-		for(int i=1;i<fitness.length;i++){
-			if(fitness[i]<fitness[min]){
-				min=i;
+	}
+	
+	private static Chromosome mutate(Chromosome chromosome) {
+		int[] genes = chromosome.getGenes().clone();
+		int size = genes.length;
+		int[] newGenes =genes.clone();
+		Random generator = new Random();
+		int city_index = generator.nextInt(size);
+		int value = genes[city_index];
+		int new_position = city_index;
+		while(new_position==city_index){
+			new_position = generator.nextInt(size);
+		}
+		for(int i=city_index;i<size-1;i++){
+			newGenes[i] = newGenes[i+1];
+		}
+		newGenes[size-1]=0;
+		for(int i=size-1;i>new_position;i--){
+			newGenes[i]=newGenes[i-1];
+		}
+		newGenes[new_position] = value;
+		return new Chromosome(newGenes.length,newGenes);
+	}
+
+	private static void findElitists(List<Chromosome> chromosomes) {
+		List<Chromosome> temp = new ArrayList<Chromosome>();
+		for(int i=0;i<chromosomes.size();i++){
+			temp.add(chromosomes.get(i));
+		}
+		for(int i=0;i<ELITISTS_NUMBER;i++){
+			Chromosome best = selectBestChromosome(temp);
+			elitists.add(best);
+			temp.remove(best);
+		}		
+	}
+
+	private static Chromosome[] selectParents(List<Chromosome> chromosomes) {
+		double[] probabilities = new double[chromosomes.size()];
+		double sum = 0.0;
+		for(int i=0;i<probabilities.length;i++){
+			probabilities[i] = evaluateFitness(chromosomes.get(i));
+			sum += probabilities[i];
+		}
+		for(int i=0;i<probabilities.length;i++){
+			probabilities[i] /= sum;
+		}
+		for(int i=1;i<probabilities.length;i++){
+			probabilities[i] +=probabilities[i-1];
+		}
+		Random generator = new Random();
+		int fatherIndex = findIndex(probabilities,generator.nextDouble());
+		int motherIndex = fatherIndex;
+		while(motherIndex==fatherIndex){
+			motherIndex = findIndex(probabilities, generator.nextDouble());
+		}
+		Chromosome[] parents = new Chromosome[2];
+		parents[0] = chromosomes.get(fatherIndex);
+		parents[1] = chromosomes.get(motherIndex);
+		return parents;
+	}
+
+	private static int findIndex(double[] probabilities, double nextDouble) {
+		for(int i=0;i<probabilities.length;i++){
+			if(nextDouble<probabilities[i]){
+				return i;
 			}
 		}
-		chromosomes.remove(chromosomes.get(min));
+		return -1;
 	}
 
 	private static void print(List<Chromosome> chromosomes) {
@@ -143,28 +233,31 @@ public class Genetic {
 
 	private static Chromosome[] crossOver(Chromosome father, Chromosome mother) {
 		Chromosome[] children = new Chromosome[2];
-		int[] genesFather = father.getGenes().clone();
-		int[] genesMother = mother.getGenes().clone();
-		int size = genesFather.length;
+		int[] fatherGenes = father.getGenes().clone();
+		int[] motherGenes = mother.getGenes().clone();
+		int size = fatherGenes.length;
 		Random generator = new Random();
-		int k = generator.nextInt(size);
-		System.out.println(k);
-		int fatherGene = genesFather[k];
-		int motherGene = genesMother[k];
-		children[0] = new Chromosome(size,genesFather);
-		children[1] = new Chromosome(size,genesMother);
-		int index = findGene(children[0].getGenes(),motherGene);
-		children[0].getGenes()[index]=fatherGene;
-		children[0].getGenes()[k]=motherGene;
-		index = findGene(children[1].getGenes(),fatherGene);
-		children[1].getGenes()[index]=motherGene;
-		children[1].getGenes()[k]=fatherGene;
+		int k = generator.nextInt(size-1)+1;
+		for(int i=0;i<k;i++){
+			int toBeChanged = mother.getGenes()[i];
+			int index = findIndex(fatherGenes,toBeChanged);
+			fatherGenes[index]=fatherGenes[i];
+			fatherGenes[i]=toBeChanged;
+		}
+		for(int i=0;i<k;i++){
+			int toBeChanged = father.getGenes()[i];
+			int index = findIndex(motherGenes,toBeChanged);
+			motherGenes[index]=motherGenes[i];
+			motherGenes[i]=toBeChanged;
+		}
+		children[0]=new Chromosome(fatherGenes.length,fatherGenes);
+		children[1]=new Chromosome(motherGenes.length,motherGenes);
 		return children;
 	}
 
-	private static int findGene(int[] genes, int motherGene) {
-		for(int i=0;i<genes.length;i++){
-			if(genes[i]==motherGene){
+	private static int findIndex(int[] array, int value) {
+		for(int i=0;i<array.length;i++){
+			if(array[i]==value){
 				return i;
 			}
 		}
