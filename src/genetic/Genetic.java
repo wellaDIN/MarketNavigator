@@ -20,8 +20,8 @@ public class Genetic {
 	private static final String MAZE_COORDINATES = "file/easy_coordinates.txt";
 	private static final int POPULATION_SIZE = 3;
 	private static final int ELITISTS_NUMBER = 1;
-	private static final int MAX_ITERATIONS = 10;
-	private static final double MUTATION_THRESHOLD = 0.1;
+	private static final int MAX_ITERATIONS = 100;
+	private static final double MUTATION_THRESHOLD = 0.5;
 	private static List<Product> products;
 	private static Coordinate startingPoint;
 	private static Coordinate endingPoint;

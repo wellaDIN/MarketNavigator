@@ -82,38 +82,11 @@ public class Ant {
 					return;
 				}
 			} else{
-				/*
-				 * Here we should deal with angles of open spaces..
-				 * 
-				 * int x;
-				int y;
-				if(p1.getX()==point.getX()){
-					x=p1.getY();
-					y=p2.getX();
-				} else {
-					x=p1.getX();
-					y=p2.getY();
-				}
-				if(!thereIs(pathsTable, x,y)){
-					point.setAnExit(true);
-					return;
-				}*/
 			}
 			
 		}
 	}
 	
-	private boolean thereIs(List<Path> p, int x, int y) {
-		for(int i=0; i<p.size();i++){
-			Coordinate c1 = p.get(i).firstPoint;
-			Coordinate c2 = p.get(i).lastPoint;
-			if((c1.getX()==x && c1.getY()==y) || (c2.getX()==x && c2.getY()==y)){
-				return true;
-			}
-		}
-		return false;
-	}
-
 	private List<Path> getPossiblePaths(Coordinate point){
 		List<Path> p = new ArrayList<Path>();
 		for(int i=0; i<pathsTable.size();i++){
@@ -140,29 +113,6 @@ public class Ant {
 						lastExit=currentPosition;
 					}
 				}
-				/*
-				if(openSpaceMode){
-					Coordinate temp = currentPosition;
-					List<Path> pathsAvoidingLastStep = avoid_last_step_repetition((ArrayList<Path>) getPossiblePaths());
-					Path firstPath = pathsAvoidingLastStep.get(0);
-					Action action = firstPath.getAction(currentPosition);
-					route.addAction(action);
-					currentPosition = firstPath.otherPoint(currentPosition);
-					if(!currentPosition.hasBeenMarked()){
-						analyze(currentPosition);
-					}
-					if(!navigate_in_white_space(firstPath, action)){
-						break;
-					}
-					previousExit = temp;
-				} else {
-					break;
-				}*/
-			}
-			/*
-			if(currentPosition.equalsTo(route.getObjectivePoint())){
-				break;
-			}*/
 			List<Path> possiblePaths = getPossiblePaths();
 			List<Path> pathsAvoidingLastStep = avoid_last_step_repetition((ArrayList<Path>) possiblePaths);
 			if(deadEndMode){
@@ -221,20 +171,7 @@ public class Ant {
 				}
 			}
 		}
-		//System.out.println("Una formica ha raggiunto la fine del labirinto!");
-		/*
-		if(currentPosition.isAnExit()){
-			if(this.lastExit==null){
-				lastExit = currentPosition;
-			} else {
-				if(!lastExit.equalsTo(currentPosition)){
-					if(!alreadyAnOpenSpace(lastExit, currentPosition)){
-						this.openSpaces.add(new OpenSpace(lastExit, currentPosition));
-					}
-					lastExit=currentPosition;
-				}
-			}
-		}*/
+		}
 	}
 
 	private boolean alreadyAnOpenSpace(Coordinate a, Coordinate b) {
@@ -244,182 +181,6 @@ public class Ant {
 			}
 		}
 		return false;
-	}
-
-	private boolean navigate_in_white_space(Path toAvoid, Action action) {
-		//TODO Use pheromone in the probability for finding the exit
-		boolean horizontal = true;
-		switch(action){
-			case North:
-				horizontal=false;
-			case South:
-				horizontal=false;
-			default:
-				break;
-		}
-		Coordinate destination = findExit(toAvoid.otherPoint(currentPosition));
-		if(destination==null){
-			return false;
-		}
-		if(destination!=null){
-			int x_distance = destination.getX()-currentPosition.getX();
-			int y_distance = destination.getY()-currentPosition.getY();
-			boolean x_positive=true;
-			boolean y_positive=true;
-			if(x_distance<0){
-				//TODO Check if it works;
-				x_distance = -x_distance;
-				x_positive=false;
-			}
-			if(y_distance<0){
-				y_distance = -y_distance;
-				y_positive=false;
-			}
-			while(!currentPosition.equalsTo(destination)){
-				if(horizontal){
-					int counter=0;
-					while(x_distance!=0){
-						counter++;
-						int x_update = try_to_move(x_distance,x_positive,Action.North,Action.South, toAvoid);
-						if(x_update==-1){
-							x_distance = destination.getX()-currentPosition.getX();
-							if(!avoid_obstacle(false, y_positive, toAvoid)){
-								avoid_obstacle(false,!y_positive,toAvoid);
-							}
-							y_distance = destination.getY()-currentPosition.getY();
-						} else {
-							x_distance = x_update;
-						}
-						if(counter>5){
-							break;
-						}
-					}
-					counter=0;
-					while(y_distance!=0){
-						counter++;
-						int y_update = try_to_move(y_distance,y_positive,Action.West,Action.East, toAvoid);
-						if(y_update==-1){
-							y_distance = destination.getY()-currentPosition.getY();
-							if(!avoid_obstacle(false, x_positive, toAvoid)){
-								avoid_obstacle(false,!x_positive,toAvoid);
-							}
-							x_distance = destination.getX()-currentPosition.getX();
-						} else {
-							y_distance = y_update;
-						}
-						if(counter>5){
-							break;
-						}
-					}
-				} else {
-					int counter=0;
-					while(y_distance!=0){
-						counter++;
-						int y_update = try_to_move(y_distance,y_positive,Action.West,Action.East, toAvoid);
-						if(y_update==-1){
-							y_distance = destination.getY()-currentPosition.getY();
-							if(!avoid_obstacle(false, x_positive, toAvoid)){
-								avoid_obstacle(false,!x_positive,toAvoid);
-							}
-							x_distance = destination.getX()-currentPosition.getX();
-						} else {
-							y_distance = y_update;
-						}
-						if(counter>5){
-							break;
-						}
-					}
-					counter=0;
-					while(x_distance!=0){
-						counter++;
-						int x_update = try_to_move(x_distance,x_positive,Action.North,Action.South, toAvoid);
-						if(x_update==-1){
-							x_distance = destination.getX()-currentPosition.getX();
-							if(!avoid_obstacle(false, y_positive, toAvoid)){
-								avoid_obstacle(false,!y_positive,toAvoid);
-							}
-							y_distance = destination.getY()-currentPosition.getY();
-						} else {
-							x_distance = x_update;
-						}
-						if(counter>5){
-							break;
-						}
-					}
-				}
-				if(x_distance==0 && y_distance==0){
-					break;
-				}
-			}
-		}	
-		return true;
-	}
-
-	//If moveInVertical is true it means that we have to change x, otherwise y
-	private boolean avoid_obstacle(boolean moveInVertical, boolean positive, Path toAvoid) {
-		List<Path> p = getPossiblePaths(currentPosition);
-		Path decision = null;
-		if(moveInVertical){
-			if(positive){
-				decision = findByPointAndOppositeAction(p, currentPosition, Action.South);
-				if(decision==null || decision.equalsTo(toAvoid)){
-					return false;
-				}
-				route.addAction(decision.getAction(currentPosition));
-				currentPosition = decision.otherPoint(currentPosition);
-				//System.out.println(currentPosition.print());
-				return true;
-			} else {
-				decision = findByPointAndOppositeAction(p, currentPosition, Action.North);
-				if(decision==null || decision.equalsTo(toAvoid)){
-					return false;
-				}
-				route.addAction(decision.getAction(currentPosition));
-				currentPosition = decision.otherPoint(currentPosition);
-				//System.out.println(currentPosition.print());
-				return true;
-			}
-		} else {
-			if(positive){
-				decision = findByPointAndOppositeAction(p, currentPosition, Action.West);
-				if(decision==null || decision.equalsTo(toAvoid)){
-					return false;
-				}
-				route.addAction(decision.getAction(currentPosition));
-				currentPosition = decision.otherPoint(currentPosition);
-				//System.out.println(currentPosition.print());
-				return true;
-			} else {
-				decision = findByPointAndOppositeAction(p, currentPosition, Action.East);
-				if(decision==null || decision.equalsTo(toAvoid)){
-					return false;
-				}
-				route.addAction(decision.getAction(currentPosition));
-				currentPosition = decision.otherPoint(currentPosition);
-				//System.out.println(currentPosition.print());
-				return true;
-			}
-		}
-	}
-
-	private int try_to_move(int distance, boolean positive, Action positiveAction, Action negativeAction, Path toAvoid) {
-		while(distance>0){
-			List<Path> p = getPossiblePaths(currentPosition);
-			Path decision = null;
-			if(positive){
-				decision = findByPointAndOppositeAction(p, currentPosition, positiveAction);
-			} else {
-				decision = findByPointAndOppositeAction(p, currentPosition, negativeAction);
-			}
-			if(decision==null || decision.equalsTo(toAvoid)){
-				return -1;
-			}
-			route.addAction(decision.getAction(currentPosition));
-			currentPosition = decision.otherPoint(currentPosition);
-			//System.out.println(currentPosition.print());
-			distance--;
-		}	
-		return distance;
 	}
 
 	private Coordinate findExit(Coordinate c) {
@@ -440,7 +201,7 @@ public class Ant {
 		}
 		int size = possibleExites.size();
 		if(size==0){
-			//System.out.println("Non ci sono possibili uscite");
+			//System.out.println("There are no possible exites");
 			return null;
 		}
 		//System.out.println("Possibili uscite sono: ");
@@ -571,13 +332,13 @@ public class Ant {
 		}
 		if(openSpaceDestination!=null){
 			if(openSpaceDestination.equalsTo(currentPosition)){
-				//System.out.println("Open Space attraversato! Destinazione raggiunta!");
+				//System.out.println("You crossed the openspace! Destination has been reached!");
 				openSpaceMode = false;
 				openSpaceDestination = null;
 				return getProbabilities(possiblePaths, betterPaths);
 			} else {
 				if(currentPosition.isAnExit()){
-					//System.out.println("ERRORE. SI STA CERCANDO DI USCIRE DA UN OPENSPACE DIVERSAMENTE DA QUANTO CONSIGLIATO!");
+					//System.out.println("ERROR!");
 				}
 			}
 		}
@@ -605,13 +366,11 @@ public class Ant {
 			}
 			if(advicedVerticalAction!=null){
 				if(workingPath.getAction(currentPosition).equals(advicedVerticalAction)){
-					//System.out.println("Applico il bonus per andare verso " + advicedVerticalAction);
 					probabilities[i]+=probabilities[i]*100/BONUS_PER_OPEN_SPACE;
 				}
 			}
 			if(advicedHorizontalAction!=null){
 				if(workingPath.getAction(currentPosition).equals(advicedHorizontalAction)){
-					//System.out.println("Applico il bonus per andare verso " + advicedHorizontalAction);
 					probabilities[i]+=probabilities[i]*100/BONUS_PER_OPEN_SPACE;
 				}
 			}
@@ -619,7 +378,6 @@ public class Ant {
 		}
 		for(int i=0;i<probabilities.length;i++){
 			probabilities[i]/=sum;
-			//System.out.println( possiblePaths.get(i).getAction(currentPosition) + " -> " + probabilities[i]);
 		}
 		return probabilities;
 	}
