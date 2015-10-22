@@ -21,6 +21,7 @@ public class Genetic {
 	private static final int POPULATION_SIZE = 3;
 	private static final int ELITISTS_NUMBER = 1;
 	private static final int MAX_ITERATIONS = 100;
+	private static final int MAX_MUTATION_ATTEMPTS = 20;
 	private static final double MUTATION_THRESHOLD = 0.5;
 	private static List<Product> products;
 	private static Coordinate startingPoint;
@@ -29,6 +30,7 @@ public class Genetic {
 	private static Route[][] routes;
 	private static List<Chromosome> chromosomes = new ArrayList<Chromosome>();
 	private static List<Chromosome> elitists = new ArrayList<Chromosome>();
+	private static List<Chromosome> visited = new ArrayList<Chromosome>();
 	
 	public static void main(String[] args) {
 		products = Utility.productsFileToProductsList(PRODUCTS_FILE);
@@ -80,6 +82,7 @@ public class Genetic {
 				}
 			}
 		}
+		visited.addAll(chromosomes);
 		int counter=0;
 		print(chromosomes);
 		findElitists(chromosomes);
@@ -98,6 +101,28 @@ public class Genetic {
 				if(p2<MUTATION_THRESHOLD){
 					mutate(children[1]);
 				}
+				int mutation_counter = 0;
+				while(hasBeenAlreadyVisited(children[0])){
+					mutate(children[0]);
+					mutation_counter++;
+					if(mutation_counter>MAX_MUTATION_ATTEMPTS){
+						break;
+					}
+				}
+				if(!hasBeenAlreadyVisited(children[0])){
+					visited.add(children[0]);
+				}
+				mutation_counter = 0;
+				while(hasBeenAlreadyVisited(children[1])){
+					mutate(children[1]);
+					mutation_counter++;
+					if(mutation_counter>MAX_MUTATION_ATTEMPTS){
+						break;
+					}
+				}
+				if(!hasBeenAlreadyVisited(children[1])){
+					visited.add(children[1]);
+				}
 				newPopulation.add(children[0]);
 				newPopulation.add(children[1]);
 			}
@@ -112,6 +137,16 @@ public class Genetic {
 	}
 
 	
+	private static boolean hasBeenAlreadyVisited(Chromosome chromosome) {
+		for(int i=0; i<visited.size();i++){
+			if(visited.get(i).equals(chromosome)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+
 	private static void createFileWithFinalRoute() {
 		File finalRouteFile = new File("file/output/TSPFinalRoute.txt");
 		try {
