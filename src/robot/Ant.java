@@ -113,6 +113,7 @@ public class Ant {
 						lastExit=currentPosition;
 					}
 				}
+			}
 			List<Path> possiblePaths = getPossiblePaths();
 			List<Path> pathsAvoidingLastStep = avoid_last_step_repetition((ArrayList<Path>) possiblePaths);
 			if(deadEndMode){
@@ -170,7 +171,6 @@ public class Ant {
 					lastExit=currentPosition;
 				}
 			}
-		}
 		}
 	}
 
